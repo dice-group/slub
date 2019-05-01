@@ -5,6 +5,7 @@ import logging as log
 import os
 import shutil
 
+
 def getIdentifiers(slubcrtl):
     """
     Gets identifiers from file or creates the identifiers file.
@@ -17,6 +18,7 @@ def getIdentifiers(slubcrtl):
         # get all identifiers and store it
         slubcrtl.storeIdentifiers()
         identifiers = slubcrtl.loadIdentifiers()
+    log.info("Loaded {} identifiers".format(len(identifiers)))
     return identifiers
 
 
@@ -35,7 +37,7 @@ def main():
     folder = "records"
     slubcrtl.storeRecords(folder, identifiers)
 
-		# removes empty folders
+    # removes empty folders
     for identifier in identifiers:
         identifierDir = folder+"/"+identifier
         if os.path.isdir(identifierDir) and not os.listdir(identifierDir):
@@ -45,13 +47,13 @@ def main():
     for identifier in identifiers:
         slubcrtl.readRecordSendFox(folder, identifier)
 
-		# skip = len(identifiers)
+    # skip = len(identifiers)
     # for identifier in identifiers[skip:len(identifiers)]:
     #     identifierDir = folder+"/"+identifier
     #     if os.path.isdir(identifierDir):
     #         # print("delet identifierDir" +identifierDir)
     #         shutil.rmtree(identifierDir)
-		
+
     log.info("Main finsihed.")
 
 

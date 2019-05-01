@@ -92,7 +92,6 @@ class SlubController(object):
         """
         log.info("Gets all identifiers from a file")
         identifiers = self.readSerialize(self.identifiersFile)
-        log.info("Loaded {} identifiers".format(len(identifiers)))
         return identifiers
 
     def storeIdentifiers(self):
