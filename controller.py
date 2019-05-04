@@ -18,11 +18,12 @@ class SlubController(object):
         Stores for each given identifier the text data in the xml file
         """
         for identifier in identifiers:
-            log.info("Stores record for identifier:{}".format(identifier))
 
             identifierDir = folder+"/"+identifier
             if os.path.isdir(identifierDir):
                 continue
+
+            log.info("Stores record for identifier:{}".format(identifier))
 
             os.mkdir(identifierDir)
 
@@ -63,6 +64,8 @@ class SlubController(object):
         for (dirpath, dirnames, filenames) in os.walk(folder+"/"+identifier):
             files.extend(filenames)
             break
+
+        files = [fi for fi in files if not fi.endswith(".ttl")]
 
         if len(files) == 0:
             return None
