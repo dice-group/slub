@@ -4,6 +4,8 @@ from controller import SlubController
 import logging as log
 import os
 import shutil
+from multiprocessing import Pool
+from functools import partial
 
 
 def getIdentifiers(slubcrtl):
@@ -22,8 +24,19 @@ def getIdentifiers(slubcrtl):
     return identifiers
 
 
+def foxf(identifier, folder, slubcrtl):
+    slubcrtl.readRecordSendFox(folder, identifier)
+
+
 def main():
-    log.basicConfig(filename='slub.log', level=log.DEBUG)
+    log.basicConfig(
+        filename='log.log',
+        level=log.DEBUG,
+        format='%(asctime)s %(levelname)-2s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+
+    processes = 5
 
     log.info("Main started...")
 
@@ -38,14 +51,17 @@ def main():
     slubcrtl.storeRecords(folder, identifiers)
 
     # removes empty folders
-    for identifier in identifiers:
-        identifierDir = folder+"/"+identifier
-        if os.path.isdir(identifierDir) and not os.listdir(identifierDir):
-            shutil.rmtree(identifierDir)
+    # for identifier in identifiers:
+    #    identifierDir = folder+"/"+identifier
+    #    if os.path.isdir(identifierDir) and not os.listdir(identifierDir):
+    #        shutil.rmtree(identifierDir)
 
     # send text data to fox and store turtle files
-    for identifier in identifiers:
-        slubcrtl.readRecordSendFox(folder, identifier)
+    with Pool(processes) as pool:
+        pool.map(partial(foxf, folder=folder, slubcrtl=slubcrtl), identifiers)
+
+    # for identifier in identifiers:
+    #    slubcrtl.readRecordSendFox(folder, identifier)
 
     # skip = len(identifiers)
     # for identifier in identifiers[skip:len(identifiers)]:
