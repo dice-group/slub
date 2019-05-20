@@ -24,8 +24,12 @@ def getIdentifiers(slubcrtl):
     return identifiers
 
 
-def foxf(identifier, folder, slubcrtl):
+def readRecordSendFox(identifier, folder, slubcrtl):
     slubcrtl.readRecordSendFox(folder, identifier)
+
+
+def storeRecord(identifier, folder, slubcrtl):
+    slubcrtl.storeRecord(folder, identifier)
 
 
 def main():
@@ -48,27 +52,20 @@ def main():
 
     # store for each identifier the text data
     folder = "records"
-    slubcrtl.storeRecords(folder, identifiers)
 
-    # removes empty folders
-    # for identifier in identifiers:
-    #    identifierDir = folder+"/"+identifier
-    #    if os.path.isdir(identifierDir) and not os.listdir(identifierDir):
-    #        shutil.rmtree(identifierDir)
+    # slubcrtl.storeRecords(folder, identifiers)
+    with Pool(processes) as pool:
+        pool.map(
+            partial(storeRecord, folder=folder, slubcrtl=slubcrtl),
+            identifiers)
 
     # send text data to fox and store turtle files
-    with Pool(processes) as pool:
-        pool.map(partial(foxf, folder=folder, slubcrtl=slubcrtl), identifiers)
-
     # for identifier in identifiers:
     #    slubcrtl.readRecordSendFox(folder, identifier)
-
-    # skip = len(identifiers)
-    # for identifier in identifiers[skip:len(identifiers)]:
-    #     identifierDir = folder+"/"+identifier
-    #     if os.path.isdir(identifierDir):
-    #         # print("delet identifierDir" +identifierDir)
-    #         shutil.rmtree(identifierDir)
+    with Pool(processes) as pool:
+        pool.map(
+            partial(readRecordSendFox, folder=folder, slubcrtl=slubcrtl),
+            identifiers)
 
     log.info("Main finsihed.")
 

@@ -13,40 +13,44 @@ class SlubController(object):
         self.slub = slub
         self.fox = fox
 
+    def storeRecord(self, folder, identifier):
+        """
+        Stores for each given identifier the text data in the xml file
+        """
+        identifierDir = folder+"/"+identifier
+        if not os.path.isdir(identifierDir):
+            os.mkdir(identifierDir)
+
+        log.info("Stores record for identifier:{}".format(identifier))
+
+        record = self.slub.requestToGetRecord(identifier)
+        if record is None:
+            log.error("identifier:{} not found".format(identifier))
+            return
+
+        xmlFiles = self.slub.parseFulltextFileNames(record)
+
+        for xmlFile in xmlFiles:
+            file = xmlFile[xmlFile.rfind("/"):len(xmlFile)]
+            file = identifierDir+file+".txt"
+
+            if os. path. isfile(file):
+                continue
+
+            xmlContent = self.slub.requestXML(xmlFile)
+            if xmlContent is None:
+                log.error("xmlContent:{} not found".format(xmlFile))
+                continue
+
+            content = self.slub.parseAppyFineReaderAnnotations(xmlContent)
+            self.writeFile(file, str(content), "w")
+
     def storeRecords(self, folder, identifiers):
         """
         Stores for each given identifier the text data in the xml file
         """
         for identifier in identifiers:
-
-            identifierDir = folder+"/"+identifier
-            if os.path.isdir(identifierDir):
-                continue
-
-            log.info("Stores record for identifier:{}".format(identifier))
-
-            os.mkdir(identifierDir)
-
-            record = self.slub.requestToGetRecord(identifier)
-            if record is None:
-                log.error("identifier:{} not found".format(identifier))
-                continue
-
-            xmlFiles = self.slub.parseFulltextFileNames(record)
-
-            for xmlFile in xmlFiles:
-                xmlContent = self.slub.requestXML(xmlFile)
-                if xmlContent is None:
-                    log.error("xmlContent:{} not found".format(xmlFile))
-                    continue
-
-                content = self.slub.parseAppyFineReaderAnnotations(xmlContent)
-                file = xmlFile[xmlFile.rfind("/"):len(xmlFile)]
-                self.writeFile(
-                    identifierDir+file+".txt",
-                    str(content),
-                    "w"
-                )
+            self.storeRecord(folder, identifier)
 
     def readRecordSendFox(self, folder, identifier):
         """
@@ -70,7 +74,6 @@ class SlubController(object):
         if len(files) == 0:
             return None
 
-        # record = {}
         for file in files:
             textFile = folder+"/"+identifier+"/"+file
             if os.path.exists(textFile+".ttl"):
@@ -79,12 +82,10 @@ class SlubController(object):
             log.info("read and send Fox: {}".format(textFile))
 
             content = self.readFile(textFile, "r")
-            # record[file] = content
             if content is not None:
                 res = self.fox.requestFox(content)
                 if res is not None:
                     self.writeFile(textFile+".ttl", res, "w")
-        # return record
 
     def loadIdentifiers(self):
         """
