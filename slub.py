@@ -97,7 +97,7 @@ class Slub(object):
             return None
         else:
             respXML = resp.text
-            tree = BeautifulSoup(respXML, "lxml")
+            tree = BeautifulSoup(respXML, "lxml")# .prettify()
             return tree
 
     def requestXML(self, url):
@@ -117,7 +117,7 @@ class Slub(object):
             return None
         else:
             respXML = resp.text
-            tree = BeautifulSoup(respXML, "lxml")#.prettify()
+            tree = BeautifulSoup(respXML, "lxml")# .prettify()
             return tree
 
     def parseAppyFineReaderAnnotations(self, tree):
@@ -129,6 +129,33 @@ class Slub(object):
         :return: content
         :rtype: string
         """
+
+        textblocks = tree.findAll("textblock")
+        content = ""
+        # for each block
+        for textblock in textblocks:
+            # for each line
+            for line in textblock.findAll("textline"):
+                # find each word
+                for contentString in line.findAll("string"):
+                    word = str(contentString.get("content").strip())
+                    content = content + word + " "
+                # after each line we start a new line
+                content = content + "\r\n"
+            # after each block we add a line break
+            content = content + "\r\n\n"
+        return content
+
+    def parseAppyFineReaderAnnotations_OLD(self, tree):
+        """
+        Parses the xml with annotations to text.
+
+        :param xmlFile: body of the xml file
+        :type a: string
+        :return: content
+        :rtype: string
+        """
+
         contentStrings = tree.findAll("string")
         content = ""
         for contentString in contentStrings:
@@ -149,7 +176,7 @@ class Slub(object):
 
     def parseFulltextFileNames(self, tree):
         """
-        Gets the XML file names from the record's tree
+        Returns the XML file names parsed from the given record tree
 
         :return: xml files
         :rtype: list
