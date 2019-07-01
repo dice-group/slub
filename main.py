@@ -2,10 +2,9 @@ from slub import Slub
 from fox import Fox
 from controller import SlubController
 import logging as log
-# import os
-# import shutil
 from multiprocessing import Pool
 from functools import partial
+
 
 """
  Change in case you need to.

@@ -1,10 +1,11 @@
 import logging as log
-import pickle
+from ioutils import IOUtils
 import os
+import json
 
 
 class SlubController(object):
-
+    ioutils = IOUtils()
     fox = None
     slub = None
     identifiersFile = "identifiers.txt"
@@ -44,8 +45,8 @@ class SlubController(object):
                 continue
 
             content = self.slub.parseAppyFineReaderAnnotations(xmlContent)
-            self.writeFile(fileTxt, str(content), "w")
-            self.writeFile(fileXml, str(xmlContent), "w")
+            self.ioutils.writeFile(fileTxt, str(content), "w")
+            self.ioutils.writeFile(fileXml, str(xmlContent), "w")
 
     def storeRecords(self, folder, identifiers):
         """
@@ -83,11 +84,11 @@ class SlubController(object):
 
             log.info("read and send Fox: {}".format(textFile))
 
-            content = self.readFile(textFile, "r")
+            content = self.ioutils.readFile(textFile, "r")
             if content is not None:
                 res = self.fox.requestFox(content)
                 if res is not None:
-                    self.writeFile(textFile+".ttl", res, "w")
+                    self.ioutils.writeFile(textFile+".ttl", res, "w")
 
     def loadIdentifiers(self):
         """
@@ -97,8 +98,8 @@ class SlubController(object):
         :rtype: list or None
         """
         log.info("Gets all identifiers from a file")
-        identifiers = self.readSerialize(self.identifiersFile)
-        return identifiers
+        identifiers = self.ioutils.readFile(self.identifiersFile, "r")
+        return json.loads(identifiers)
 
     def storeIdentifiers(self):
         """
@@ -124,30 +125,7 @@ class SlubController(object):
                     cursor, completelistsize)
                 )
                 identifiers.extend(self.slub.parseIds(tree))
-
-        self.writeSerialize(self.identifiersFile, identifiers)
-
-    def writeFile(self, filename, content, mode="wb"):
-        f = open(filename, mode)
-        f.write(content)
-        f.close()
-
-    def readFile(self, filename, mode="rb"):
-        try:
-            f = open(filename, mode)
-            content = f.read()
-            f.close()
-            return content
-        except FileNotFoundError:
-            log.error("FileNotFoundError:{}".format(filename))
-            return None
-
-    def writeSerialize(self, filename, content):
-        serial = pickle.dumps(content)
-        self.writeFile(filename, serial)
-
-    def readSerialize(self, filename):
-        content = self.readFile(filename)
-        if content:
-            content = pickle.loads(content)
-        return content
+        # while done
+        self.ioutils.writeFile(
+            self.identifiersFile, json.dumps(identifiers), "w"
+        )
