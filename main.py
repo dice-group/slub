@@ -2,10 +2,15 @@ from slub import Slub
 from fox import Fox
 from controller import SlubController
 import logging as log
-import os
-import shutil
+# import os
+# import shutil
 from multiprocessing import Pool
 from functools import partial
+
+"""
+ Change in case you need to.
+"""
+DEBUG = 0
 
 
 def getIdentifiers(slubcrtl):
@@ -33,14 +38,19 @@ def storeRecord(identifier, folder, slubcrtl):
 
 
 def main():
+
     log.basicConfig(
         filename='log.log',
-        level=log.DEBUG,
-        format='%(asctime)s %(levelname)-2s %(message)s',
+        level=log.DEBUG if DEBUG else log.INFO,
+        # format='%(asctime)s %(levelname)-2s %(message)s',
+        format="[%(filename)s:%(lineno)s-%(funcName)20s() ] %(message)s",
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    processes = 5
+    if DEBUG:
+        log.info("Application started in DEBUG mode.")
+
+    processes = 1 if DEBUG else 20
 
     log.info("Main started...")
 
@@ -49,6 +59,9 @@ def main():
 
     # record identifiers
     identifiers = getIdentifiers(slubcrtl)
+
+    if DEBUG:
+        identifiers = identifiers[0:1]
 
     # store for each identifier the text data
     folder = "records"
