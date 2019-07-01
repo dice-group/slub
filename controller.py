@@ -32,9 +32,10 @@ class SlubController(object):
 
         for xmlFile in xmlFiles:
             file = xmlFile[xmlFile.rfind("/"):len(xmlFile)]
-            file = identifierDir+file+".txt"
+            fileTxt = identifierDir+file+".txt"
+            fileXml = identifierDir+file
 
-            if os. path. isfile(file):
+            if os. path. isfile(fileTxt):
                 continue
 
             xmlContent = self.slub.requestXML(xmlFile)
@@ -43,7 +44,8 @@ class SlubController(object):
                 continue
 
             content = self.slub.parseAppyFineReaderAnnotations(xmlContent)
-            self.writeFile(file, str(content), "w")
+            self.writeFile(fileTxt, str(content), "w")
+            self.writeFile(fileXml, str(xmlContent), "w")
 
     def storeRecords(self, folder, identifiers):
         """
